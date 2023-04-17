@@ -18,8 +18,7 @@ const tokenContract = new ethers.Contract(tokenAddress, ['function balanceOf(add
 
 // Read and parse the Uniswap V2 Router ABI from the JSON file
 const uniswapRouterJson = fs.readFileSync('SpookySwapRouter.json', 'utf8');
-const uniswapRouterContract = JSON.parse(uniswapRouterJson)
-const uniswapRouterABI = uniswapRouterContract.abi;
+const uniswapRouterABI = JSON.parse(uniswapRouterJson)
 
 const uniswapRouter = new ethers.Contract(uniswapRouterAddress, uniswapRouterABI, wallet);
 

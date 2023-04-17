@@ -7,6 +7,8 @@ const ethers = require('ethers');
 const infuraApiKey = process.env.INFURA_API_KEY;
 const privateKey = process.env.PRIVATE_KEY;
 
+const WFTM_ADDRESS = '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83';
+
 // Initialize Ethereum provider and wallet
 const provider = new WebSocketProvider('wss://thrumming-alien-putty.fantom.discover.quiknode.pro/98031b209341897c27b860bad97c505089734836/');
 const wallet = new ethers.Wallet(privateKey, provider);
@@ -41,9 +43,10 @@ async function processTransaction(txHash) {
             const amountIn = decodedInputData[0];
             const path = decodedInputData[2];
             const tokenOut = path[path.length - 1];
+            const counterpartyToken = path[0];
 
-            // Check if token out is the target token
-            if (tokenOut.toLowerCase() === tokenAddress.toLowerCase()) {
+            // Check if token out is the target token and counterparty token is ETH
+            if (tokenOut.toLowerCase() === tokenAddress.toLowerCase() && counterpartyToken.toLowerCase() === WFTM_ADDRESS.toLowerCase()) {
                 const amountOutMin = decodedInputData[1];
                 const deadline = decodedInputData[4];
 

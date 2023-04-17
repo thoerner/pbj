@@ -25,7 +25,39 @@ const gasPrice = ethers.utils.parseUnits('60', 'gwei'); // Gas price for transac
 async function processTransaction(txHash) {
     try {
         const tx = await provider.getTransaction(txHash);
-        // TODO: Identify opportunities and execute
+        const txTo = tx.to;
+        const txFrom = tx.from;
+
+        // Check if transaction is a token swap
+        if (txTo.toLowerCase() === uniswapRouterAddress.toLowerCase() && tx.data.startsWith('0x') && txFrom.toLowerCase() !== wallet.address.toLowerCase()) {
+
+            const decodedInputData = uniswapRouter.interface.decodeFunctionData('swapExactTokensForTokens(uint256,uint256,address[],address,uint256)', tx.data);
+
+            const amountIn = decodedInputData[0];
+            const path = decodedInputData[2];
+            const tokenOut = path[path.length - 1];
+
+            // Check if token out is the target token
+            if (tokenOut.toLowerCase() === tokenAddress.toLowerCase()) {
+                const amountOutMin = decodedInputData[1];
+                const deadline = decodedInputData[4];
+
+                // Calculate the amount of target token to sell and buy
+                const amountInMax = amountIn.mul(ethers.utils.parseUnits('1', 'ether')).div(ethers.utils.parseUnits('1', 'ether').sub(slippage));
+                const amountOut = sandwichAmount;
+
+                // Execute the sandwich
+                const tx = await uniswapRouter.swapExactTokensForTokens(
+                    amountOut,
+                    amountOutMin,
+                    [tokenAddress, ...path],
+                    wallet.address,
+                    deadline,
+                    { gasPrice: gasPrice, gasLimit: 1000000 }
+                );
+                console.log(`Sandwich executed: ${tx.hash}`);
+            }
+        }
     } catch (error) {
         console.error(`Error processing transaction: ${error.message}`);
     }

@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { WebSocketProvider } = require('@ethersproject/providers')
 require('dotenv').config();
 const ethers = require('ethers');
@@ -14,7 +15,12 @@ const wallet = new ethers.Wallet(privateKey, provider);
 const tokenAddress = '0xf16e81dce15B08F326220742020379B855B87DF9'; // Replace with the target token contract address
 const uniswapRouterAddress = '0xF491e7B69E4244ad4002BC14e878a34207E38c29'; // Uniswap V2 router address
 const tokenContract = new ethers.Contract(tokenAddress, ['function balanceOf(address) view returns (uint256)'], provider);
-const uniswapRouterABI = [...]; // Load Uniswap V2 router ABI
+
+// Read and parse the Uniswap V2 Router ABI from the JSON file
+const uniswapRouterJson = fs.readFileSync('SpookySwapRouter.json', 'utf8');
+const uniswapRouterContract = JSON.parse(uniswapRouterJson)
+const uniswapRouterABI = uniswapRouterContract.abi;
+
 const uniswapRouter = new ethers.Contract(uniswapRouterAddress, uniswapRouterABI, wallet);
 
 // Parameters for sandwich bot
